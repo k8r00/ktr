@@ -106,9 +106,15 @@ body::after{
   border-bottom:1px solid var(--cream-faint);
 }
 .monogram{
-  font-family:var(--serif);font-weight:600;font-size:1.18rem;letter-spacing:.04em;
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-family:var(--serif);font-weight:600;font-size:1.15rem;letter-spacing:.14em;
   color:var(--cream-bright);
+  opacity:0;pointer-events:none;
+  transition:opacity .4s var(--ease);
 }
+.monogram.show{opacity:1;pointer-events:auto}
+/* only relevant on mobile, where the nav is hidden */
+@media (min-width:641px){.monogram{display:none}}
 .nav{display:flex;gap:1.7rem}
 .nav a{
   font-size:.82rem;font-weight:500;letter-spacing:.04em;color:var(--cream-soft);
@@ -152,7 +158,6 @@ body::after{
 .portrait{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   border-radius:14px;
-  filter:grayscale(100%) contrast(1.04) brightness(.96);
   /* blend the photo's edges into the red field, like the reference */
   -webkit-mask-image:linear-gradient(105deg, transparent 0%, #000 26%, #000 100%),
                      linear-gradient(to top, transparent 0%, #000 22%, #000 100%);
@@ -327,7 +332,8 @@ body::after{
 
 <!-- ============================= TOP BAR ============================= -->
 <header class="topbar" id="topbar">
-  <a href="#top" class="monogram">Kaitlyn Roque</a>
+  <span class="topbar__spacer"></span>
+  <a href="#top" class="monogram" id="monogram">KTR</a>
   <nav class="nav" aria-label="Sections">
     <a href="#about">About</a>
     <a href="#work">Work</a>
@@ -470,10 +476,10 @@ const PROFILE = {
   firstName : "Kaitlyn",
   lastName  : "Roque",
   phone     : "+639151264285",                 // e.g. "+63 917 000 0000"   <-- fill in
-  email     : "k.dc.roque@proton.me",                 // e.g. "you@example.com"    <-- fill in
-  org       : "AutoLube Corporation",                 // optional, e.g. company name
+  email     : "kt.dc.roque@proton.me",                 // e.g. "you@example.com"    <-- fill in
+  org       : "AutoLube Corp",                 // optional, e.g. company name
   title     : "Director",         // optional job title on the saved contact
-  url       : "https://autolube.com.ph",                 // optional, e.g. "https://yourname.github.io"
+  url       : "autolube.com.ph",                 // optional, e.g. "https://yourname.github.io"
   photo     : "kaitlyn.jpg"       // filename of the image you upload to the repo
 };
 /* =============================================================== */
@@ -553,6 +559,16 @@ const PROFILE = {
   const onScroll = () => topbar.classList.toggle("solid", window.scrollY > 40);
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
+
+  /* ---- show the KTR monogram once the hero name scrolls under the header ---- */
+  const monogram = document.getElementById("monogram");
+  const heroName = document.querySelector(".hero__name");
+  if (monogram && heroName && "IntersectionObserver" in window) {
+    const nameObs = new IntersectionObserver((entries) => {
+      monogram.classList.toggle("show", !entries[0].isIntersecting);
+    }, { rootMargin: "-64px 0px 0px 0px", threshold: 0 });
+    nameObs.observe(heroName);
+  }
 
   /* ---- reveal on scroll ---- */
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
